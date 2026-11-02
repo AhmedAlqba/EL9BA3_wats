@@ -1,0 +1,100 @@
+<!DOCTYPE html>
+<html lang="ar" dir="rtl">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>تسجيل الدخول</title>
+    <style>
+        * { box-sizing: border-box; margin: 0; padding: 0; font-family: Tahoma, sans-serif; }
+        body { background-color: #f8f9fa; display: flex; height: 100vh; justify-content: center; align-items: center; }
+        .card { width: 100%; max-width: 380px; background: #fff; padding: 30px; border-radius: 6px; border: 1px solid #eaeaea; }
+        h2 { font-size: 18px; color: #333; margin-bottom: 20px; text-align: center; }
+        .group { margin-bottom: 15px; }
+        .group label { display: block; font-size: 13px; color: #666; margin-bottom: 5px; }
+        .group input { width: 100%; padding: 10px; border: 1px solid #ddd; border-radius: 4px; outline: none; font-size: 14px; }
+        .group input:focus { border-color: #d4a017; }
+        .btn { width: 100%; padding: 10px; background: #d4a017; color: white; border: none; border-radius: 4px; font-weight: bold; cursor: pointer; font-size: 14px; margin-top: 5px; }
+        .btn:hover { background: #b8860b; }
+        .switch { text-align: center; margin-top: 15px; font-size: 13px; color: #666; cursor: pointer; }
+        .switch span { color: #d4a017; font-weight: bold; }
+    </style>
+</head>
+<body>
+    <div class="card">
+        <h2 id="formTitle">تسجيل الدخول</h2>
+        <div class="group">
+            <label>البريد الإلكتروني</label>
+            <input type="email" id="email" placeholder="name@example.com">
+        </div>
+        <div class="group">
+            <label>كلمة المرور</label>
+            <input type="password" id="password" placeholder="••••••••">
+        </div>
+        <div class="group" id="confirmGroup" style="display: none;">
+            <label>تأكيد كلمة المرور</label>
+            <input type="password" id="confirmPassword" placeholder="••••••••">
+        </div>
+        <button class="btn" id="actionBtn">دخول</button>
+        <div class="switch" id="switchText">ليس لديك حساب؟ <span>انشئ حساب جديد</span></div>
+    </div>
+
+    <script type="module">
+        import { initializeApp } from "https://www.gstatic.com/firebasejs/10.7.1/firebase-app.js";
+        import { getAuth, signInWithEmailAndPassword, createUserWithEmailAndPassword, onAuthStateChanged } from "https://www.gstatic.com/firebasejs/10.7.1/firebase-auth.js";
+
+        const firebaseConfig = {
+          apiKey: "AIzaSyDjZ7_KNTVAoBb2WnYselvQNd39YMZOarw",
+          authDomain: "my-wats-test.firebaseapp.com",
+          databaseURL: "https://my-wats-test-default-rtdb.firebaseio.com",
+          projectId: "my-wats-test",
+          storageBucket: "my-wats-test.firebasestorage.app",
+          messagingSenderId: "1094683201140",
+          appId: "1:1094683201140:web:b9f42046692f09353e8b21",
+          measurementId: "G-RZ5G8WYYY3"
+        };
+
+        const app = initializeApp(firebaseConfig);
+        const auth = getAuth(app);
+
+        onAuthStateChanged(auth, (user) => {
+            if (user) { window.location.href = "index.html"; }
+        });
+
+        let isSignUp = false;
+        const formTitle = document.getElementById('formTitle');
+        const actionBtn = document.getElementById('actionBtn');
+        const switchText = document.getElementById('switchText');
+        const confirmGroup = document.getElementById('confirmGroup');
+        const emailInput = document.getElementById('email');
+        const passwordInput = document.getElementById('password');
+        const confirmPasswordInput = document.getElementById('confirmPassword');
+
+        switchText.addEventListener('click', () => {
+            isSignUp = !isSignUp;
+            formTitle.innerText = isSignUp ? "إنشاء حساب جديد" : "تسجيل الدخول";
+            actionBtn.innerText = isSignUp ? "تسجيل" : "دخول";
+            switchText.innerHTML = isSignUp ? "لديك حساب بالفعل؟ <span>سجل دخولك</span>" : "ليس لديك حساب؟ <span>انشئ حساب جديد</span>";
+            confirmGroup.style.display = isSignUp ? "block" : "none";
+        });
+
+        actionBtn.addEventListener('click', () => {
+            const email = emailInput.value.trim();
+            const password = passwordInput.value.trim();
+            const confirmPassword = confirmPasswordInput.value.trim();
+
+            if(!email || !password) { alert("الرجاء إدخال البريد وكلمة المرور"); return; }
+
+            if(isSignUp) {
+                if(password !== confirmPassword) { alert("كلمتا المرور غير متطابقتين!"); return; }
+                createUserWithEmailAndPassword(auth, email, password).then(() => {
+                    window.location.href = "index.html";
+                }).catch((error) => { alert("خطأ: " + error.message); });
+            } else {
+                signInWithEmailAndPassword(auth, email, password).then(() => {
+                    window.location.href = "index.html";
+                }).catch((error) => { alert("خطأ: " + error.message); });
+            }
+        });
+    </script>
+</body>
+</html>
